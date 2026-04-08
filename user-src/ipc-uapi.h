@@ -414,10 +414,16 @@ static int userspace_get_device(struct wgdevice **out, const char *iface)
 			peer->tx_bytes = NUM(0xffffffffffffffffULL);
 		else if (!strcmp(key, "errno"))
 			ret = -NUM(0x7fffffffU);
+
+		memzero_explicit(key, line_buffer_len);
 	}
 	ret = -EPROTO;
 err:
-	free(key);
+	if (key != NULL) {
+		if (line_buffer_len > 0)
+			memzero_explicit(key, line_buffer_len);
+		free(key);
+	}
 	if (ret) {
 		free_wgdevice(dev);
 		*out = NULL;

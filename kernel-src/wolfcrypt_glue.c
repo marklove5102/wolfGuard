@@ -340,25 +340,26 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
     {
         ret = -EINVAL;
         WC_DEBUG_PR_CODEPOINT();
-        goto out;
+        goto out_aes_uninited;
     }
 
     if (sg_nents(src) < 1) {
         ret = -EINVAL;
         WC_DEBUG_PR_CODEPOINT();
-        goto out;
+        goto out_aes_uninited;
     }
 
     aes = (Aes *)XMALLOC(sizeof *aes, NULL, DYNAMIC_TYPE_TMP_BUFFER);
     if (! aes) {
-        WC_DEBUG_PR_FALSE_RET(false);
+        ret = -ENOMEM;
+        goto out_aes_uninited;
     }
 
     ret = wc_AesInit(aes, NULL, INVALID_DEVID);
     if (ret != 0) {
         ret = -EINVAL;
         WC_DEBUG_PR_CODEPOINT();
-        goto out;
+        goto out_aes_uninited;
     }
 
     memset(full_nonce, 0, sizeof(full_nonce));
@@ -455,6 +456,9 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
   out:
 
     wc_AesFree(aes);
+
+  out_aes_uninited:
+
     free(aes);
 
     WC_DEBUG_PR_IF_NEG(ret);

@@ -131,7 +131,9 @@ int setconf_main(int argc, char *argv[])
 		return 1;
 	}
 	while (getline(&config_buffer, &config_buffer_len, config_input) >= 0) {
-		if (!config_read_line(&ctx, config_buffer)) {
+		bool ok = config_read_line(&ctx, config_buffer);
+		memzero_explicit(config_buffer, config_buffer_len);
+		if (! ok) {
 			fprintf(stderr, "Configuration parsing error\n");
 			goto cleanup;
 		}

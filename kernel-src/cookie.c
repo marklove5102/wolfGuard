@@ -179,18 +179,20 @@ enum cookie_mac_state __must_check wg_cookie_validate_packet(struct cookie_check
 		goto out;
 
 	if (compute_mac2(computed_mac, skb->data, skb->len, cookie) != 0)
-		goto out;
+		goto out_with_cookie;
 
 	if (ConstantCompare(computed_mac, macs->mac2, COOKIE_LEN))
-		goto out;
-
-	memzero_explicit(cookie, sizeof cookie);
+		goto out_with_cookie;
 
 	ret = VALID_MAC_WITH_COOKIE_BUT_RATELIMITED;
 	if (!wg_ratelimiter_allow(skb, dev_net(checker->device->dev)))
-		goto out;
+		goto out_with_cookie;
 
 	ret = VALID_MAC_WITH_COOKIE;
+
+out_with_cookie:
+
+	memzero_explicit(cookie, sizeof cookie);
 
 out:
 

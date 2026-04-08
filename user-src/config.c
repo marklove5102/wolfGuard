@@ -548,6 +548,8 @@ bool config_read_line(struct config_ctx *ctx, const char *input)
 		goto out;
 	ret = process_line(ctx, line);
 out:
+	if ((cleaned_len > 0) && (line != NULL))
+		memzero_explicit(line, cleaned_len);
 	free(line);
 	if (!ret)
 		free_wgdevice(ctx->device);
