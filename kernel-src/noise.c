@@ -466,7 +466,7 @@ static bool __must_check mix_precomputed_dh(u8 chaining_key[NOISE_HASH_LEN],
 					    u8 key[NOISE_SYMMETRIC_KEY_LEN],
 					    const u8 precomputed[NOISE_PRIVATE_KEY_LEN])
 {
-	static u8 zero_point[NOISE_PRIVATE_KEY_LEN];
+	static const u8 zero_point[NOISE_PRIVATE_KEY_LEN];
 	if (unlikely(!ConstantCompare(precomputed, zero_point, NOISE_PRIVATE_KEY_LEN)))
 		WC_DEBUG_PR_FALSE_RET(false);
 	if (kdf(chaining_key, key, NULL, precomputed, NOISE_HASH_LEN,
