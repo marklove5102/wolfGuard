@@ -225,6 +225,7 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
     else
         ret = wc_AesGcmEncryptInit(aes, key, (word32)key_len,
                                    full_nonce, (word32)sizeof(full_nonce));
+    wc_ForceZero(full_nonce, sizeof full_nonce);
     if (ret != 0) {
         WC_DEBUG_PR_CODEPOINT();
         goto out;
@@ -243,9 +244,7 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
         }
     }
 
-    flags = SG_MITER_TO_SG;
-    if (!preemptible())
-        flags |= SG_MITER_ATOMIC;
+    flags = SG_MITER_TO_SG | SG_MITER_ATOMIC;
 
     sg_miter_start(&miter, src, sg_nents(src), flags);
     miter_needs_stop = 1;
@@ -368,9 +367,7 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
 #endif
     memcpy(full_nonce + 4, (u8 *)&nonce, sizeof(nonce));
 
-    flags = SG_MITER_TO_SG;
-    if (!preemptible())
-        flags |= SG_MITER_ATOMIC;
+    flags = SG_MITER_TO_SG | SG_MITER_ATOMIC;
 
     ret = wc_AesGcmSetKey(aes, key, (word32)key_len);
     if (ret) {
@@ -460,6 +457,8 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
   out_aes_uninited:
 
     free(aes);
+
+    wc_ForceZero(full_nonce, sizeof full_nonce);
 
     WC_DEBUG_PR_IF_NEG(ret);
 
