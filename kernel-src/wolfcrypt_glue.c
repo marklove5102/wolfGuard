@@ -186,7 +186,7 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
     struct sg_mapping_iter miter;
     int miter_needs_stop = 0;
     unsigned int flags;
-    int sl;
+    ssize_t sl;
     Aes *aes = NULL;
     byte full_nonce[AES_IV_SIZE];
 
@@ -249,8 +249,8 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
     sg_miter_start(&miter, src, sg_nents(src), flags);
     miter_needs_stop = 1;
 
-    for (sl = src_len; sl > 0 && sg_miter_next(&miter); sl -= miter.length) {
-        size_t length = min_t(size_t, sl, miter.length);
+    for (sl = (ssize_t)src_len; sl > 0 && sg_miter_next(&miter); sl -= miter.length) {
+        size_t length = min_t(size_t, sl, (ssize_t)miter.length);
 
         if (isDecrypt)
             ret = wc_AesGcmDecryptUpdate(aes, miter.addr, miter.addr,
@@ -271,9 +271,9 @@ static __always_inline bool wc_AesGcm_crypt_sg_inplace(struct scatterlist *src, 
      */
     if (sl <= -WC_AES_BLOCK_SIZE) {
         if (isDecrypt)
-            ret = wc_AesGcmDecryptFinal(aes, miter.addr + miter.length + sl, WC_AES_BLOCK_SIZE);
+            ret = wc_AesGcmDecryptFinal(aes, miter.addr + (ssize_t)miter.length + sl, WC_AES_BLOCK_SIZE);
         else
-            ret = wc_AesGcmEncryptFinal(aes, miter.addr + miter.length + sl, WC_AES_BLOCK_SIZE);
+            ret = wc_AesGcmEncryptFinal(aes, miter.addr + (ssize_t)miter.length + sl, WC_AES_BLOCK_SIZE);
         if (ret < 0) {
             WC_DEBUG_PR_CODEPOINT();
             goto out;
