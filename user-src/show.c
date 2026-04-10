@@ -181,14 +181,19 @@ static size_t pretty_time(char *buf, const size_t len, unsigned long long left)
 
 	if (years)
 		offset += snprintf(buf + offset, len - offset, "%s%llu " TERMINAL_FG_CYAN "year%s" TERMINAL_RESET, offset ? ", " : "", years, years == 1 ? "" : "s");
-	if (days)
+	if (days && (offset < len))
 		offset += snprintf(buf + offset, len - offset, "%s%llu " TERMINAL_FG_CYAN  "day%s" TERMINAL_RESET, offset ? ", " : "", days, days == 1 ? "" : "s");
-	if (hours)
+	if (hours && (offset < len))
 		offset += snprintf(buf + offset, len - offset, "%s%llu " TERMINAL_FG_CYAN  "hour%s" TERMINAL_RESET, offset ? ", " : "", hours, hours == 1 ? "" : "s");
-	if (minutes)
+	if (minutes && (offset < len))
 		offset += snprintf(buf + offset, len - offset, "%s%llu " TERMINAL_FG_CYAN "minute%s" TERMINAL_RESET, offset ? ", " : "", minutes, minutes == 1 ? "" : "s");
-	if (seconds)
+	if (seconds && (offset < len))
 		offset += snprintf(buf + offset, len - offset, "%s%llu " TERMINAL_FG_CYAN  "second%s" TERMINAL_RESET, offset ? ", " : "", seconds, seconds == 1 ? "" : "s");
+
+	if (offset >= len) {
+		buf[len-1] = '\0';
+		offset = len -1;
+	}
 
 	return offset;
 }
