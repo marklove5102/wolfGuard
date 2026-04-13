@@ -98,21 +98,20 @@ static void wg_ratelimiter_gc_entries(struct work_struct *work)
 
 bool wg_ratelimiter_allow(struct sk_buff *skb, struct net *net)
 {
-	const u32 net_word = (unsigned long)net;
 	struct ratelimiter_entry *entry;
 	struct hlist_head *bucket;
 	u64 ip;
 
 	if (skb->protocol == htons(ETH_P_IP)) {
 		ip = (u64 __force)ip_hdr(skb)->saddr;
-		bucket = &table_v4[wc_2u32_keyed_hash(key, sizeof(key), net_word, ip) &
+		bucket = &table_v4[wc_2u64_keyed_hash(key, sizeof(key), (u64)net, ip) &
 				   (table_size - 1)];
 	}
 #if IS_ENABLED(CONFIG_IPV6)
 	else if (skb->protocol == htons(ETH_P_IPV6)) {
 		/* Only use 64 bits, so as to ratelimit the whole /64. */
 		memcpy(&ip, &ipv6_hdr(skb)->saddr, sizeof(ip));
-		bucket = &table_v6[wc_3u32_keyed_hash(key, sizeof(key), net_word, ip >> 32, ip) &
+		bucket = &table_v6[wc_2u64_keyed_hash(key, sizeof(key), (u64)net, ip) &
 				   (table_size - 1)];
 	}
 #endif

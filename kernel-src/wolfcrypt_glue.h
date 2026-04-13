@@ -166,6 +166,14 @@ static inline u32 wc_2u32_keyed_hash(const byte *key, const size_t key_len, u32 
     return wc_u32_keyed_hash(key, key_len, (byte *)&ubuf, sizeof(ubuf));
 }
 
+static inline u32 wc_2u64_keyed_hash(const byte *key, const size_t key_len, u64 u1, u64 u2) {
+    struct __attribute__((packed)) {
+        u64 u1;
+        u64 u2;
+    } ubuf = { .u1 = u1, .u2 = u2 };
+    return wc_u32_keyed_hash(key, key_len, (byte *)&ubuf, sizeof(ubuf));
+}
+
 static inline u32 wc_3u32_keyed_hash(const byte *key, const size_t key_len, u32 u1, u32 u2, u32 u3) {
     struct __attribute__((packed)) {
         u32 u1;

@@ -20,14 +20,19 @@
 
 struct wg_device;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 17, 0)
+/* see 463deed517 and 9203e0a82c */
+/* Large enough to hold both sockaddr_in and sockaddr_in6. */
+struct sockaddr_inet {
+	unsigned short  sa_family;
+	char		sa_data[sizeof(struct sockaddr_in6) -
+				sizeof(unsigned short)];
+};
+#endif
+
 struct endpoint {
 	union {
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 17, 0)
-		/* see 463deed517 and 9203e0a82c */
 		struct sockaddr_inet addr;
-	#else
-		struct sockaddr addr;
-	#endif
 		struct sockaddr_in addr4;
 		struct sockaddr_in6 addr6;
 	};
